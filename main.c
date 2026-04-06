@@ -47,7 +47,7 @@ typedef struct Order{
 //                          CAC HAM XU LY
 //================================================================================
 // Tạo món ăn mới
-Dish* TaoMonAn(const char* ma, const char* ten, int soluong){
+Dish* TaoMonAnMoi(const char* ma, const char* ten, int soluong){
     Dish* monMoi = (Dish*) malloc(sizeof(Dish));
     strcpy(monMoi->maMon, ma);
     strcpy(monMoi->tenMon, ten);
@@ -80,8 +80,8 @@ Order* TaoOrderMoi(int soban, const char* nhanVien){
 void ThemMonAnVaoOrder(Order* donHang, Dish* monMoi){
     if (donHang == NULL || monMoi == NULL)  return;
 
-    if (donHang->next == NULL){
-        donHang->next = monMoi;
+    if (donHang->danhSachMon == NULL){
+        donHang->danhSachMon = monMoi; 
     } else {
         Dish* temp = donHang->danhSachMon;
         while (temp->next != NULL){
@@ -133,11 +133,11 @@ void LuuHoaDonRaFile(Order* donHang, const char* tenfile){
         return;
     }
 
-    fprintf(file,"========================================================");
+    fprintf(file,"========================================================\n");
     fprintf(file,"       HOA DON BAN SO: %d\n.", donHang->maBan );
     fprintf(file,"       Nhan Vien: %s\n.",donHang->tenNhanVien );
     fprintf(file,"       Thoi gian tao: %s\n ", donHang->thoiGian);
-    fprintf(file,"--------------------------------------------------------");
+    fprintf(file,"--------------------------------------------------------\n");
     Dish* temp = donHang->danhSachMon;
     int stt = 1;
     while (temp != NULL){
@@ -145,18 +145,28 @@ void LuuHoaDonRaFile(Order* donHang, const char* tenfile){
         temp = temp->next;
         stt++;
     }
-    fprintf(file,"-------------------------------------------------------");
+    fprintf(file,"-------------------------------------------------------\n");
     fprintf(file, "Tong so mon: %d | Tong so dia: %d\n", donHang->tongSoMon, donHang->tongSoDiaDat);
-    fprintf(file,"##### DA THANH TOAN ####");
-    fprintf(file,"========================================================");
+    fprintf(file,"##### DA THANH TOAN ####\n");
+    fprintf(file,"========================================================\n");
     fclose(file);
-    printf("Da luu hoa don vao file.txt thanh cong!!");
+    printf("Da luu hoa don vao file.txt thanh cong!!\n");
 }
 // ========================================================================= 
 //                  CHUONG TRINH CHINH
 // =========================================================================
-int main(){
+int main(){ 
+    printf("====HE THONG QUAN LY NHA HANG CUA ON KHOA LUONG====\n");
+    Order* banso5 = TaoOrderMoi(5, "Luong");
+    strcpy(banso5->thoiGian, "20:07 8/3/2028");
 
+    Dish* mon1 = TaoMonAnMoi("M01", "Tra Sua", 2);
+    Dish* mon2 = TaoMonAnMoi("M02", "Khoai Mon Le Pho", 4);
+    ThemMonAnVaoOrder(banso5, mon1);
+    ThemMonAnVaoOrder(banso5, mon2);
+    
+    banso5->trangThai = DA_THANH_TOAN;
+    LuuHoaDonRaFile(banso5, "LichSuBanHang.txt");
 
     return 0;
 }
