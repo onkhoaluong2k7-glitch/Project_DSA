@@ -9,7 +9,9 @@
 #define MAX_NOTE 100
 // Trạng thái đơn hàng
 typedef enum{
-    DANG_PHUC_VU,
+    MOI_TAO,
+    DANG_LAM,
+    DA_XONG,
     DA_THANH_TOAN,
     DON_HUY  
 } TrangThai;
@@ -23,6 +25,7 @@ typedef struct Dish{
     int soLuongTra;
     char thoiGianCapNhat[20];
     char ghiChu[MAX_NOTE];
+    TrangThai trangThai;
     int long gia;
 
     struct Dish* next;
@@ -55,6 +58,7 @@ Dish* TaoMonAnMoi(const char* ma, const char* ten, int soluong){
 
     monMoi->soLuongTra = 0;
     strcpy(monMoi->ghiChu, "");
+    monMoi->trangThai = MOI_TAO;
     monMoi->next = NULL;
 
     return monMoi;
@@ -70,11 +74,17 @@ Order* TaoOrderMoi(int soban, const char* nhanVien){
     donMoi->tongSoDiaDat = 0;
     donMoi->tongSoMonTra = 0;
     donMoi->tongSoDiaTra = 0;
-    donMoi->trangThai = DANG_PHUC_VU;
+    donMoi->trangThai = DANG_LAM;
     donMoi->next = NULL;
     donMoi->danhSachMon = NULL;
 
     return donMoi;
+}
+//Hàm thay đổi trạng thái 
+void ThayDoiTrangThaiMonAn(Dish* temp,  TrangThai tt){
+    if ( temp != NULL) {
+        temp->trangThai = tt;
+    }
 }
 // Hàm thêm món ăn mới vào order
 void ThemMonAnVaoOrder(Order* donHang, Dish* monMoi){
