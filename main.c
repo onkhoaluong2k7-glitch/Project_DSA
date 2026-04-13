@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <time.h>
+#include "sqlite3.h"
 //====================================================================
 //                  KHAI BAO CAC BIEN, CAC KIEU DU LIEU
 //====================================================================
@@ -23,7 +24,7 @@ typedef struct Dish{
     char thoigian[20];
     int soLuongDat;
     int soLuongTra;
-    char thoiGianCapNhat[20];
+    //char thoiGianCapNhat[20];
     char ghiChu[MAX_NOTE];
     TrangThai trangThai;
     int long gia;
@@ -49,6 +50,12 @@ typedef struct Order{
 //================================================================================
 //                          CAC HAM XU LY
 //================================================================================
+//Ham lay thoi gian hien tai
+void LayThoiGianHienTai(char* buffer){
+    time_t thoiGian = time(NULL);
+    struct tm *thoiGianChuan = localtime(&thoiGian);
+    strftime(buffer, 20, "%H:%M %d/%m/%Y", thoiGianChuan);
+}
 // Tạo món ăn mới
 Dish* TaoMonAnMoi(const char* ma, const char* ten, int soluong){
     Dish* monMoi = (Dish*) malloc(sizeof(Dish));
@@ -59,6 +66,7 @@ Dish* TaoMonAnMoi(const char* ma, const char* ten, int soluong){
     monMoi->soLuongTra = 0;
     strcpy(monMoi->ghiChu, "");
     monMoi->trangThai = MOI_TAO;
+    //LayThoiGianHienTai(monMoi->thoiGianCapNhat);
     monMoi->next = NULL;
 
     return monMoi;
@@ -80,6 +88,7 @@ Order* TaoOrderMoi(int soban, const char* nhanVien){
 
     return donMoi;
 }
+
 //Hàm thay đổi trạng thái 
 void ThayDoiTrangThaiMonAn(Dish* temp,  TrangThai tt){
     if ( temp != NULL) {
@@ -162,21 +171,63 @@ void LuuHoaDonRaFile(Order* donHang, const char* tenfile){
     fclose(file);
     printf("Da luu hoa don vao file.txt thanh cong!!\n");
 }
+//Hàm để in hóa đơn ra ngoài màn hình
+void InHoaDonRaNgoaiManHinh(Order* donHang){
+    if (donHang == NULL || donHang->danhSachMon == NULL) return;
+
+    printf("========================================================\n");
+    printf("       HOA DON BAN SO: %d\n.", donHang->maBan );
+    printf("       Nhan Vien: %s\n.",donHang->tenNhanVien );
+    printf("       Thoi gian tao: %s\n ", donHang->thoiGian);
+    printf("--------------------------------------------------------\n");
+    Dish* temp = donHang->danhSachMon;
+    int stt = 1;
+    while(temp != NULL){
+        printf("%d. %-15s | SL: %d | Trang thai: Da Tra\n", stt, temp->tenMon, temp->soLuongDat);
+        temp = temp->next;
+        stt++;
+    }
+    printf("-------------------------------------------------------\n");
+    printf("Tong so mon: %d | Tong so dia: %d\n", donHang->tongSoMon, donHang->tongSoDiaDat);
+    printf("##### DA THANH TOAN ####\n");
+    printf("========================================================\n");
+};
+
 // ========================================================================= 
 //                  CHUONG TRINH CHINH
 // =========================================================================
 int main(){ 
     printf("====HE THONG QUAN LY NHA HANG CUA ON KHOA LUONG====\n");
-    Order* banso5 = TaoOrderMoi(5, "Luong");
-    strcpy(banso5->thoiGian, "20:07 8/3/2028");
 
+    Order* banso = TaoOrderMoi(1, "Luong");
+    
     Dish* mon1 = TaoMonAnMoi("M01", "Tra Sua", 2);
     Dish* mon2 = TaoMonAnMoi("M02", "Khoai Mon Le Pho", 4);
-    ThemMonAnVaoOrder(banso5, mon1);
-    ThemMonAnVaoOrder(banso5, mon2);
-    
-    banso5->trangThai = DA_THANH_TOAN;
-    LuuHoaDonRaFile(banso5, "LichSuBanHang.txt");
+    while(1){
+        printf("1. Tao danh sach cac mon an.\n");
+        printf("2. Them mon an.\n");
+        printf("3. Xoa mon.\n");
+        printf("4. Xem hoa don. \n");
+        printf("Vui long chon: ");
+        int opt;
+        scanf("%d", &opt);
+        switch (opt){
+            case 1:
+                printf("Da tao xong!\n");
+                break;
+            case 2:
+                ThemMonAnVaoOrder(banso, mon1);
+                ThemMonAnVaoOrder(banso, mon2);
+                break;
+            case 4:
+                LuuHoaDonRaFile(banso,"LichSuBanHang.txt");
+                break;
+            default:
+                printf("Lua chon khong hop le!\nVui long nhap lai!\n");
+                break;
+        }
+        break;
+    }
 
     return 0;
 }
