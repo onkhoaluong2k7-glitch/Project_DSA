@@ -13,6 +13,7 @@ typedef enum{
     MOI_TAO,
     DANG_LAM,
     DA_XONG,
+    DA_TRA_MON,
     DA_THANH_TOAN,
     DON_HUY  
 } TrangThai;
@@ -43,6 +44,7 @@ typedef struct Order{
     int tongSoMonTra;
     int tongSoDiaTra;
     char thoiGianCapNhat[20];
+    long tien;
     TrangThai trangThai;
     struct Order* next;
 } Order;
@@ -138,6 +140,47 @@ void XoaMonAnTrongOrder(Order* donHang, const char* ma){
     }
     printf("Khong tim thay mon an de xoa!!");
 }
+// hàm hủy đơn hàng
+void HuyDonHang(Order* donHang){
+    if (donHang == NULL) return;
+    if (donHang->tongSoDiaTra > 0) {
+        printf("Khong the huy don! Do bep da tra mon!\n");
+        return;
+    }
+
+    donHang->trangThai = DON_HUY;
+    LayThoiGianHienTai(donHang->thoiGianCapNhat);
+
+}
+
+// Hàm này để hủy món do Khách yêu cầu
+void KhachHuyMon(Order* ban, Dish* mon){
+    if (mon->trangThai == MOI_TAO){
+        mon->trangThai = DON_HUY;
+        strcpy(mon->ghiChu, "Khach HUY do cho qua lau!!!");
+        LayThoiGianHienTai(mon->trangThai);
+        mon->soLuongTra = 0;
+        return;
+    }
+
+    printf("Khong the huy duoc! Do bep da chuan bi!");
+    return;
+}
+// Hàm tính tiền thanh toán
+void TinhTienHoaDon(Order* donHang){
+    if (donHang == NULL || donHang->danhSachMon == NULL) return;
+    long total = 0;
+    Dish* temp = donHang->danhSachMon;
+    while (temp != NULL){
+        if (temp->trangThai == DA_TRA_MON){
+            total += (temp->soLuongTra)*(temp->gia);
+        }
+        temp = temp->next;
+    }
+    donHang->tien = total;
+    return;
+}
+// In hóa đơn ra file txt
 void LuuHoaDonRaFile(Order* donHang, const char* tenfile){
     if (donHang == NULL || donHang->danhSachMon == NULL) return;
     
